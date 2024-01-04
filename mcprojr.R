@@ -4,7 +4,6 @@
 # of the anchors
 # https://cran.r-project.org/web/packages/CVXR/vignettes/cvxr_intro.html
 ################################################################################
-require('parallel')
 # R implementation of MCProj
 get_nn = function(query_mat,target_mat,k = 10){
   simmat = t(apply(query_mat,2,FUN = function(x) apply(target_mat,2,FUN = function(y) cor(x,y))))
@@ -20,6 +19,8 @@ get_nn = function(query_mat,target_mat,k = 10){
 mixture_model_mc = function(Y,X,eps = 1e-5,method = 'CVXR'){
   if(method == 'CVXR'){
     require('CVXR')
+    # CAVE: this method takes longer!
+    
     # Given the vector Y (query metacell), represent this vector as a weighted sum of X
     # returns: a list of projections
     #  Y = query_mc_fp[,q_id]
@@ -50,6 +51,8 @@ mixture_model_mc = function(Y,X,eps = 1e-5,method = 'CVXR'){
     betas[betas<=eps] = 0
     mc_proj = as.matrix(X) %*% as.matrix(betas)
     r2 = summary(lm(Y~as.matrix(X) %*% as.matrix(betas)))$adj.r.squared
+    # rescale betas to sum to 1:
+    #betas = betas/sum(betas)
   }
   return(list(proj = mc_proj,betas = betas, r2 = r2))
 }
@@ -104,8 +107,9 @@ if(F){
 
 # pipeline function 
 MCPROJ_seeding_and_mixture_modeling = function(query_mat,target_mat,k = k,ncpu = ncpu,method = 'nnls'){
+  require(parallel)
   # method - either "CVXR" or "nnls"
-  message(sprintf('Mixture modeling of %s states with %s cores using %s target states with %s nearest neighbors.',ncol(query_mat),ncpu,ncol(target_mat),k))
+  message(sprintf('Mixture modeling of %s states using %s target states with %s nearest neighbors.',ncol(query_mat),ncol(target_mat),k))
   # input - matrices 
   # output - mixture projections
   # get anchors:
