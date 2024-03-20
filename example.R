@@ -40,8 +40,8 @@ var_genes_target = names(apply(mc_target@mc_fp,1,max)[apply(mc_target@mc_fp,1,ma
 # E_gc input ###################################################################
 # they are never negative 
 eps = 1e-5
-query_mat_input = log2(mc@e_gc + eps)
-target_mat_input = log2(mlei01_mc@e_gc + eps)
+query_mat_input = log2(mc_query@e_gc + eps)
+target_mat_input = log2(mc_target@e_gc + eps)
 query_mat_input = query_mat_input[var_genes_query,]
 target_mat_input = target_mat_input[var_genes_target,]
 #query_mat_input = query_mat_input[apply(query_mat_input,1,var)>0.1,]
